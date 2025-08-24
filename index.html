@@ -1,0 +1,277 @@
+<!doctype html>
+<html lang="zh-Hant">
+<head>
+<meta charset="utf-8"/>
+<meta name="viewport" content="width=device-width,initial-scale=1"/>
+<title>帽帽</title>
+<link rel="manifest" href="manifest.json">
+<style>
+  :root{--bg:#0b0b0c;--card:#161618;--muted:#9aa0a6;--pri:#4ade80;}
+  *{box-sizing:border-box} body{margin:0;background:#0b0b0c;color:#e5e7eb;font-family:system-ui,-apple-system,Segoe UI,Roboto,Noto Sans}
+  header{display:flex;justify-content:space-between;align-items:center;padding:12px 16px;background:#111;border-bottom:1px solid #222;position:sticky;top:0}
+  main{max-width:920px;margin:0 auto;padding:16px}
+  .card{background:#161618;border:1px solid #262626;border-radius:14px;padding:14px;margin:10px 0}
+  .btn{padding:10px 14px;border-radius:12px;border:1px solid #2a2a2a;background:#1f1f22;color:#e5e7eb;cursor:pointer}
+  .btn.primary{border-color:#1f5133;background:#1b2b1f}
+  .btn:disabled{opacity:.5;cursor:not-allowed}
+  input,select{width:100%;padding:10px;border-radius:10px;border:1px solid #2a2a2a;background:#0f0f11;color:#e5e7eb}
+  .row{display:flex;gap:8px;align-items:center}
+  .right{margin-left:auto}
+  .list{display:flex;flex-direction:column;gap:8px}
+  .banner{display:block;width:100%;padding:12px 14px;border-radius:12px;border:1px dashed #2a2a2a;background:#101012;text-align:center;color:#cbd5e1;cursor:pointer}
+  .group{border:1px dashed #2a2a2a;border-radius:10px;padding:8px;margin:8px 0}
+  .pill{display:inline-block;padding:2px 8px;border-radius:999px;border:1px solid #333;font-size:12px}
+  .ok{color:#4ade80;border-color:#2e7d32}.no{color:#ef4444;border-color:#7f1d1d}.warn{color:#f59e0b;border-color:#7c4a03}
+  .small{font-size:12px;color:#9aa0a6}
+</style>
+</head>
+<body>
+<header><div>帽帽</div><img id="navAvatar" alt="" style="width:32px;height:32px;border-radius:50%"></header>
+<main id="app"></main>
+
+<template id="tpl-login">
+  <div class="card"><h3>登入</h3>
+    <div class="small">先輸入名稱即可開始（之後可接 Google 登入）。</div>
+    <div style="height:8px"></div>
+    <input id="loginName" placeholder="顯示名稱">
+    <div style="height:8px"></div>
+    <input id="loginPhoto" placeholder="頭像網址（可留空）">
+    <div style="height:8px"></div>
+    <button class="btn primary" id="btnLogin">開始</button>
+  </div>
+</template>
+
+<template id="tpl-home">
+  <div class="card"><h3>公告</h3>
+    <div class="small">1) 先建立個人表單 2) 建立 6 碼配對碼並分享 3) 對方輸入碼並選自己的表單</div>
+  </div>
+  <div class="card">
+    <div class="row"><h3>我的表單</h3><button class="btn primary right" id="btnNewForm">建立新表單</button></div>
+    <div id="formList" class="list"></div>
+  </div>
+  <div class="card">
+    <h3>配對功能</h3>
+    <div class="row">
+      <select id="selForm"></select>
+      <button class="btn primary right" id="btnMake">建立配對碼</button>
+    </div>
+    <div class="row" style="margin-top:8px">
+      <div class="small">配對碼：<span id="codeOut" style="font-weight:700"></span></div>
+      <span class="small right" id="countdown"></span>
+    </div>
+    <div class="row" style="margin-top:8px">
+      <input id="inpCode" placeholder="輸入 6 碼" maxlength="6">
+      <button class="btn" id="btnJoin">配對</button>
+    </div>
+  </div>
+</template>
+
+<template id="tpl-form-edit">
+  <div class="card">
+    <div class="row"><h3 id="feTitle">表單編輯</h3><span class="small right" id="feId"></span></div>
+    <input id="feName" placeholder="例如：背部 A 表單">
+  </div>
+  <div id="feBody"></div>
+  <div class="row"><button class="btn" id="btnBack">返回</button><button class="btn primary right" id="btnSave">儲存</button></div>
+</template>
+
+<template id="tpl-form-view">
+  <div class="card"><div class="row"><h3 id="fvTitle"></h3><span class="small right" id="fvId"></span></div></div>
+  <div id="fvBody"></div>
+  <div class="row"><button class="btn" id="btnBackHome">返回首頁</button><button class="btn primary right" id="btnPrint">列印/PDF</button></div>
+</template>
+
+<template id="tpl-match">
+  <div class="card"><div class="row"><h3>配對結果</h3><span class="small right" id="mtId"></span></div></div>
+  <div class="row" style="gap:12px">
+    <div class="row" style="gap:6px"><img id="mtLeftPhoto" style="width:32px;height:32px;border-radius:50%"><span id="mtLeftName"></span></div>
+    <span class="small">×</span>
+    <div class="row" style="gap:6px"><img id="mtRightPhoto" style="width:32px;height:32px;border-radius:50%"><span id="mtRightName"></span></div>
+  </div>
+  <div style="height:8px"></div>
+  <div id="mtBody"></div>
+  <div class="row"><button class="btn" id="btnBackHome2">返回首頁</button><button class="btn primary right" id="btnPrint2">列印/PDF</button></div>
+</template>
+
+<script>
+const $ = s => document.querySelector(s);
+const now = () => Date.now();
+const uid = () => Math.random().toString(36).slice(2,10);
+const WILL = ['Unknown','No','0','1','2','3','5','6'];
+const CATALOG = [
+  { region:'背部訓練', sub:'上背', actions:['引體向上','高位下拉','面拉'] },
+  { region:'腿部訓練', sub:'股四頭肌', actions:['腿舉','腿伸展'] },
+];
+
+// storage
+const K_USER='mm.user', K_FORMS='mm.forms', K_CODES='mm.codes', K_MATCH='mm.matches';
+const get = (k,d)=>{try{return JSON.parse(localStorage.getItem(k))??d}catch{return d}};
+const set = (k,v)=>localStorage.setItem(k,JSON.stringify(v));
+
+function syncAvatar(){ const u=get(K_USER,null); $('#navAvatar').src=u?.photoURL||''; $('#navAvatar').alt=u?.displayName||''; }
+
+// routing (hashless simple states)
+window.addEventListener('load',()=>{ renderLogin(); });
+
+function render(tpl){ $('#app').innerHTML=$(`#${tpl}`).innerHTML; syncAvatar(); }
+
+function renderLogin(){
+  render('tpl-login');
+  $('#btnLogin').onclick=()=>{
+    const displayName=$('#loginName').value.trim()||'使用者';
+    const photoURL=$('#loginPhoto').value.trim();
+    set(K_USER,{displayName,photoURL});
+    renderHome();
+  }
+}
+
+function renderHome(){
+  if(!get(K_USER,null)) return renderLogin();
+  render('tpl-home');
+  // forms list
+  const list = $('#formList'); list.innerHTML='';
+  const forms = get(K_FORMS,{});
+  const keys = Object.keys(forms);
+  if(keys.length===0){
+    const banner=document.createElement('div');
+    banner.className='banner';
+    banner.textContent='目前沒有表單，點擊新建表單';
+    banner.onclick=()=>renderFormEdit(null);
+    list.appendChild(banner);
+  }else{
+    keys.sort((a,b)=> (forms[b].updatedAt||0)-(forms[a].updatedAt||0));
+    keys.forEach(id=>{
+      const row=document.createElement('div'); row.className='row card';
+      row.innerHTML=`<div><div><strong>${forms[id].name}</strong></div><div class="small">更新：${new Date(forms[id].updatedAt||0).toLocaleString()}</div></div>`;
+      const v=document.createElement('button'); v.className='btn'; v.textContent='預覽'; v.onclick=()=>renderFormView(id);
+      const e=document.createElement('button'); e.className='btn'; e.textContent='編輯'; e.onclick=()=>renderFormEdit(id);
+      row.appendChild(v); row.appendChild(e); list.appendChild(row);
+    });
+  }
+  $('#btnNewForm').onclick=()=>renderFormEdit(null);
+
+  // pair panel
+  const sel=$('#selForm'); sel.innerHTML='';
+  if(keys.length===0){
+    const opt=document.createElement('option'); opt.textContent='尚未有表單'; sel.appendChild(opt); sel.disabled=true;
+    $('#btnMake').disabled=true;
+  }else{
+    sel.disabled=false; $('#btnMake').disabled=false;
+    keys.forEach(id=>{ const o=document.createElement('option'); o.value=id; o.textContent=forms[id].name; sel.appendChild(o); });
+  }
+
+  $('#btnMake').onclick=()=>{
+    const id=sel.value;
+    if(!id){ alert('請先選擇要配對的表單'); return; }
+    const code=(''+Math.floor(100000+Math.random()*900000));
+    const expires=now()+5*60*1000;
+    const codes=get(K_CODES,{}); codes[code]={formId:id,expires,used:false}; set(K_CODES,codes);
+    $('#codeOut').textContent=code; startCountdown(code,expires);
+    alert('配對碼已建立：'+code);
+  };
+
+  $('#btnJoin').onclick=()=>{
+    const code=$('#inpCode').value.trim();
+    if(!code) return alert('請輸入配對碼');
+    const codes=get(K_CODES,{}); const rec=codes[code];
+    if(!rec) return alert('配對碼不存在');
+    if(rec.used) return alert('配對碼已使用');
+    if(rec.expires<=now()) return alert('配對碼已過期');
+    if(keys.length===0) return alert('請新建表單');
+    // 讓使用者挑自己的表單
+    let id=sel.value;
+    if(!id){ alert('請先選擇要配對的表單'); return; }
+    // 一次性
+    rec.used=true; codes[code]=rec; set(K_CODES,codes);
+    const left=get(K_FORMS,{})[rec.formId]; const right=get(K_FORMS,{})[id];
+    const match=buildMatch(left,right);
+    const matches=get(K_MATCH,{}); matches[match.id]=match; set(K_MATCH,matches);
+    renderMatch(match.id);
+  };
+}
+
+let timerId=null;
+function startCountdown(code,expires){
+  clearInterval(timerId);
+  const el=$('#countdown');
+  const tick=()=>{
+    const d=expires-now();
+    if(d<=0){ clearInterval(timerId); el.textContent='配對碼已過期'; const cs=get(K_CODES,{}); delete cs[code]; set(K_CODES,cs); return; }
+    const m=Math.floor(d/60000), s=Math.floor((d%60000)/1000);
+    el.textContent=`剩餘 ${m}:${String(s).padStart(2,'0')}`;
+  };
+  tick(); timerId=setInterval(tick,1000);
+}
+
+function renderFormEdit(id){
+  render('tpl-form-edit');
+  const forms=get(K_FORMS,{});
+  let f;
+  if(id && forms[id]){
+    f=JSON.parse(JSON.stringify(forms[id]));
+  }else{
+    const u=get(K_USER,null);
+    f={id:uid(), ownerName:u?.displayName||'使用者', ownerPhoto:u?.photoURL||'', name:'', createdAt:now(), updatedAt:now(), entries:[]};
+    CATALOG.forEach(g=>g.actions.forEach(a=>f.entries.push({key:`${g.region}|${g.sub}|${a}`, region:g.region, subregion:g.sub, action:a, experience:false, willingness:'Unknown'})));
+  }
+  $('#feId').textContent=f.id; $('#feName').value=f.name;
+  const body=$('#feBody'); body.innerHTML='';
+  const groups={};
+  f.entries.forEach(e=>{ const k=`${e.region}|${e.subregion}`; (groups[k]=groups[k]||[]).push(e); });
+  Object.entries(groups).forEach(([k,arr])=>{
+    const [r,s]=k.split('|'); const wrap=document.createElement('div'); wrap.className='group';
+    wrap.innerHTML=`<div><strong>${r}</strong> / <span class="small">${s}</span></div>`;
+    arr.forEach(e=>{
+      const row=document.createElement('div'); row.className='row'; row.style.margin='6px 0';
+      const btn=document.createElement('button'); btn.className='btn'; btn.textContent=e.experience?'✅ 有經驗':'❌ 無經驗';
+      btn.onclick=()=>{ e.experience=!e.experience; btn.textContent=e.experience?'✅ 有經驗':'❌ 無經驗'; };
+      const sel=document.createElement('select'); WILL.forEach(w=>{ const o=document.createElement('option'); o.textContent=w; if(e.willingness===w) o.selected=true; sel.appendChild(o); });
+      sel.onchange=ev=>e.willingness=ev.target.value;
+      const label=document.createElement('div'); label.style.minWidth='140px'; label.textContent=e.action;
+      row.appendChild(label); row.appendChild(btn); row.appendChild(sel); wrap.appendChild(row);
+    });
+    body.appendChild(wrap);
+  });
+  $('#btnBack').onclick=()=>renderHome();
+  $('#btnSave').onclick=()=>{
+    f.name=$('#feName').value.trim()||'未命名表單'; f.updatedAt=now(); const all=get(K_FORMS,{}); all[f.id]=f; set(K_FORMS,all); alert('已儲存'); renderHome();
+  };
+}
+
+function renderFormView(id){
+  const forms=get(K_FORMS,{}); const f=forms[id]; if(!f){ alert('表單不存在'); return renderHome(); }
+  render('tpl-form-view');
+  $('#fvId').textContent=id; $('#fvTitle').textContent=f.name;
+  const body=$('#fvBody'); body.innerHTML='';
+  const groups={}; f.entries.forEach(e=>{ const k=`${e.region}|${e.subregion}`; (groups[k]=groups[k]||[]).push(e); });
+  Object.entries(groups).forEach(([k,arr])=>{
+    const [r,s]=k.split('|'); const box=document.createElement('div'); box.className='group'; box.innerHTML=`<div><strong>${r}</strong> / <span class="small">${s}</span></div>`;
+    arr.forEach(e=>{ const line=document.createElement('div'); line.className='row'; line.style.margin='4px 0'; line.innerHTML=`<div style="min-width:140px">${e.action}</div><span class="pill">${e.willingness}</span>`; box.appendChild(line); });
+    body.appendChild(box);
+  });
+  $('#btnBackHome').onclick=()=>renderHome(); $('#btnPrint').onclick=()=>window.print();
+}
+
+function renderMatch(id){
+  const m=get(K_MATCH,{})[id]; if(!m){ alert('結果不存在'); return renderHome(); }
+  render('tpl-match');
+  $('#mtId').textContent=id; $('#mtLeftName').textContent=m.leftName; $('#mtRightName').textContent=m.rightName;
+  const forms=get(K_FORMS,{});
+  $('#mtLeftPhoto').src=forms[m.leftFormId]?.ownerPhoto||''; $('#mtRightPhoto').src=forms[m.rightFormId]?.ownerPhoto||'';
+  const sec=(title,arr,cls)=>{ const box=document.createElement('div'); box.className='card'; box.innerHTML=`<div class="row"><h4>${title}</h4><span class="pill ${cls} right">${arr.length}</span></div>`; if(arr.length===0) box.innerHTML+='<div class="small">無</div>'; arr.forEach(it=>{ const line=document.createElement('div'); line.className='row'; line.style.margin='4px 0'; line.innerHTML=`<div style="min-width:160px">${it.action}</div><span class="pill">${it.left}</span><span class="pill">${it.right}</span>`; box.appendChild(line); }); return box; };
+  const body=$('#mtBody'); body.innerHTML=''; body.appendChild(sec('避免項目（雙方 No）', m.result.bothNo,'no')); body.appendChild(sec('最愛項目（雙方 6）', m.result.bothSix,'ok')); body.appendChild(sec('可討論（6 × Unknown）', m.result.sixUnknown,'warn')); body.appendChild(sec('其他', m.result.others,''));
+  $('#btnBackHome2').onclick=()=>renderHome(); $('#btnPrint2').onclick=()=>window.print();
+}
+
+// algorithm
+function buildMatch(left,right){
+  const L=Object.fromEntries(left.entries.map(e=>[e.key,e])); const R=Object.fromEntries(right.entries.map(e=>[e.key,e]));
+  const res={bothNo:[],bothSix:[],sixUnknown:[],others:[]};
+  Object.keys(L).forEach(k=>{ const a=L[k], b=R[k]; if(!b) return; const pair={action:a.action,left:a.willingness,right:b.willingness}; if(a.willingness==='No'&&b.willingness==='No') res.bothNo.push(pair); else if(a.willingness==='6'&&b.willingness==='6') res.bothSix.push(pair); else if((a.willingness==='6'&&b.willingness==='Unknown')||(b.willingness==='6'&&a.willingness==='Unknown')) res.sixUnknown.push(pair); else res.others.push(pair); });
+  const u=get(K_USER,null);
+  return {id:uid(), createdAt:now(), leftFormId:left.id, rightFormId:right.id, leftName:left.ownerName, rightName:right.ownerName, result:res};
+}
+
+</script>
+</body>
+</html>
