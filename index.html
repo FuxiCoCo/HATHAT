@@ -1,277 +1,629 @@
-<!doctype html>
+<!DOCTYPE html>
 <html lang="zh-Hant">
 <head>
-<meta charset="utf-8"/>
-<meta name="viewport" content="width=device-width,initial-scale=1"/>
-<title>帽帽</title>
-<link rel="manifest" href="manifest.json">
-<style>
-  :root{--bg:#0b0b0c;--card:#161618;--muted:#9aa0a6;--pri:#4ade80;}
-  *{box-sizing:border-box} body{margin:0;background:#0b0b0c;color:#e5e7eb;font-family:system-ui,-apple-system,Segoe UI,Roboto,Noto Sans}
-  header{display:flex;justify-content:space-between;align-items:center;padding:12px 16px;background:#111;border-bottom:1px solid #222;position:sticky;top:0}
-  main{max-width:920px;margin:0 auto;padding:16px}
-  .card{background:#161618;border:1px solid #262626;border-radius:14px;padding:14px;margin:10px 0}
-  .btn{padding:10px 14px;border-radius:12px;border:1px solid #2a2a2a;background:#1f1f22;color:#e5e7eb;cursor:pointer}
-  .btn.primary{border-color:#1f5133;background:#1b2b1f}
-  .btn:disabled{opacity:.5;cursor:not-allowed}
-  input,select{width:100%;padding:10px;border-radius:10px;border:1px solid #2a2a2a;background:#0f0f11;color:#e5e7eb}
-  .row{display:flex;gap:8px;align-items:center}
-  .right{margin-left:auto}
-  .list{display:flex;flex-direction:column;gap:8px}
-  .banner{display:block;width:100%;padding:12px 14px;border-radius:12px;border:1px dashed #2a2a2a;background:#101012;text-align:center;color:#cbd5e1;cursor:pointer}
-  .group{border:1px dashed #2a2a2a;border-radius:10px;padding:8px;margin:8px 0}
-  .pill{display:inline-block;padding:2px 8px;border-radius:999px;border:1px solid #333;font-size:12px}
-  .ok{color:#4ade80;border-color:#2e7d32}.no{color:#ef4444;border-color:#7f1d1d}.warn{color:#f59e0b;border-color:#7c4a03}
-  .small{font-size:12px;color:#9aa0a6}
-</style>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>帽帽健身配對平台</title>
+  <!-- PWA manifest -->
+  <link rel="manifest" href="manifest.json" />
+  <style>
+    /* Reset */
+    * {
+      box-sizing: border-box;
+      margin: 0;
+      padding: 0;
+      font-family: Arial, sans-serif;
+    }
+    body {
+      background: #f5f5f5;
+      color: #333;
+      min-height: 100vh;
+    }
+    header {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      padding: 1rem;
+      background: #4a90e2;
+      color: #fff;
+    }
+    header h1 {
+      font-size: 1.5rem;
+    }
+    header img {
+      width: 40px;
+      height: 40px;
+      border-radius: 50%;
+    }
+    main {
+      padding: 1rem;
+    }
+    .card {
+      background: #fff;
+      border-radius: 8px;
+      box-shadow: 0 2px 5px rgba(0, 0, 0, 0.1);
+      margin-bottom: 1rem;
+      padding: 1rem;
+    }
+    button {
+      background: #4a90e2;
+      color: white;
+      border: none;
+      border-radius: 4px;
+      padding: 0.5rem 1rem;
+      cursor: pointer;
+      margin-right: 0.5rem;
+    }
+    button:disabled {
+      background: #888;
+    }
+    .form-list li {
+      list-style: none;
+      margin-bottom: 0.5rem;
+      padding: 0.5rem;
+      background: #f0f7ff;
+      border-radius: 4px;
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+    }
+    .form-list li button {
+      margin-left: 0.5rem;
+    }
+    .hidden {
+      display: none;
+    }
+    .select-container {
+      display: flex;
+      align-items: center;
+      margin-bottom: 0.5rem;
+    }
+    .select-container label {
+      flex: 0 0 120px;
+    }
+    .select-container select {
+      flex: 1;
+      padding: 0.25rem;
+    }
+    table {
+      width: 100%;
+      border-collapse: collapse;
+      margin-bottom: 1rem;
+    }
+    table th,
+    table td {
+      border: 1px solid #ddd;
+      padding: 0.5rem;
+      text-align: left;
+    }
+    table th {
+      background: #f0f0f0;
+    }
+    .result-section {
+      margin-bottom: 1rem;
+    }
+    .countdown {
+      font-weight: bold;
+      margin-left: 0.5rem;
+      color: #e67e22;
+    }
+  </style>
 </head>
 <body>
-<header><div>帽帽</div><img id="navAvatar" alt="" style="width:32px;height:32px;border-radius:50%"></header>
-<main id="app"></main>
-
-<template id="tpl-login">
-  <div class="card"><h3>登入</h3>
-    <div class="small">先輸入名稱即可開始（之後可接 Google 登入）。</div>
-    <div style="height:8px"></div>
-    <input id="loginName" placeholder="顯示名稱">
-    <div style="height:8px"></div>
-    <input id="loginPhoto" placeholder="頭像網址（可留空）">
-    <div style="height:8px"></div>
-    <button class="btn primary" id="btnLogin">開始</button>
+  <!-- Login Page -->
+  <div id="page-login">
+    <main style="text-align:center; padding-top:30vh;">
+      <h1 style="font-size:2.5rem; margin-bottom:1.5rem;">帽帽</h1>
+      <button onclick="onLogin()" style="padding:0.75rem 2rem; font-size:1rem;">登入</button>
+    </main>
   </div>
-</template>
 
-<template id="tpl-home">
-  <div class="card"><h3>公告</h3>
-    <div class="small">1) 先建立個人表單 2) 建立 6 碼配對碼並分享 3) 對方輸入碼並選自己的表單</div>
+  <!-- Dashboard Page -->
+  <div id="page-dashboard" class="hidden">
+    <header>
+      <h1>帽帽</h1>
+      <img src="https://placekitten.com/80/80" alt="使用者頭像" />
+    </header>
+    <main>
+      <!-- 公告區 -->
+      <div class="card">
+        <h2>公告</h2>
+        <p>歡迎使用帽帽健身偏好配對平台！請先建立自己的訓練表單，再使用配對碼與朋友進行匹配。</p>
+      </div>
+      <!-- 表單區 -->
+      <div class="card">
+        <h2>我的表單</h2>
+        <ul id="formList" class="form-list"></ul>
+        <!-- 建立新表單按鈕，加上 id 方便控制顯示 -->
+        <button id="newFormBtn" onclick="createNewForm()">建立新表單</button>
+      </div>
+      <!-- 配對功能區 -->
+      <div class="card">
+        <h2>配對功能</h2>
+        <div id="pairSection">
+          <!-- 下拉選擇配對用的表單，動態填入 -->
+          <select id="pairFormSelect" style="margin-right:0.5rem; padding:0.25rem;"></select>
+          <button id="generateCodeBtn" onclick="generatePairCode()">建立配對碼</button>
+          <span id="generatedCode" style="font-weight:bold; margin-left:0.5rem;"></span>
+          <span id="countdown" class="countdown"></span>
+        </div>
+        <div style="margin-top:1rem;">
+          <input type="text" id="pairInput" placeholder="輸入配對碼" style="padding:0.25rem; width:70%;" />
+          <button onclick="enterPairCode()">配對</button>
+        </div>
+      </div>
+    </main>
   </div>
-  <div class="card">
-    <div class="row"><h3>我的表單</h3><button class="btn primary right" id="btnNewForm">建立新表單</button></div>
-    <div id="formList" class="list"></div>
+
+  <!-- Form Creation / Edit Page -->
+  <div id="page-form" class="hidden">
+    <header>
+      <h1>編輯表單</h1>
+      <button onclick="goBackToDashboard()" style="background:#fff; color:#4a90e2; border:1px solid #4a90e2;">返回</button>
+    </header>
+    <main>
+      <div class="card">
+        <label>表單名稱：
+          <input type="text" id="formName" placeholder="輸入表單名稱" style="width:100%; padding:0.25rem; margin-top:0.25rem;" />
+        </label>
+      </div>
+      <div id="formArea"></div>
+      <button onclick="saveCurrentForm()" style="margin-top:1rem;">儲存表單</button>
+    </main>
   </div>
-  <div class="card">
-    <h3>配對功能</h3>
-    <div class="row">
-      <select id="selForm"></select>
-      <button class="btn primary right" id="btnMake">建立配對碼</button>
-    </div>
-    <div class="row" style="margin-top:8px">
-      <div class="small">配對碼：<span id="codeOut" style="font-weight:700"></span></div>
-      <span class="small right" id="countdown"></span>
-    </div>
-    <div class="row" style="margin-top:8px">
-      <input id="inpCode" placeholder="輸入 6 碼" maxlength="6">
-      <button class="btn" id="btnJoin">配對</button>
-    </div>
+
+  <!-- Form Preview Page -->
+  <div id="page-preview" class="hidden">
+    <header>
+      <h1>表單預覽</h1>
+      <button onclick="goBackToDashboard()" style="background:#fff; color:#4a90e2; border:1px solid #4a90e2;">返回</button>
+    </header>
+    <main id="previewContent"></main>
   </div>
-</template>
 
-<template id="tpl-form-edit">
-  <div class="card">
-    <div class="row"><h3 id="feTitle">表單編輯</h3><span class="small right" id="feId"></span></div>
-    <input id="feName" placeholder="例如：背部 A 表單">
+  <!-- Pair Result Page -->
+  <div id="page-result" class="hidden">
+    <header>
+      <h1>配對結果</h1>
+      <button onclick="goBackToDashboard()" style="background:#fff; color:#4a90e2; border:1px solid #4a90e2;">返回</button>
+    </header>
+    <main>
+      <div class="card">
+        <h2>配對雙方</h2>
+        <div style="display:flex; align-items:center;">
+          <div style="flex:1; text-align:center;">
+            <img src="https://placekitten.com/80/80" alt="A" style="border-radius:50%;" />
+            <p>使用者A</p>
+          </div>
+          <div style="flex:1; text-align:center;">
+            <img src="https://placekitten.com/81/81" alt="B" style="border-radius:50%;" />
+            <p>使用者B</p>
+          </div>
+        </div>
+      </div>
+      <div id="resultContent"></div>
+    </main>
   </div>
-  <div id="feBody"></div>
-  <div class="row"><button class="btn" id="btnBack">返回</button><button class="btn primary right" id="btnSave">儲存</button></div>
-</template>
 
-<template id="tpl-form-view">
-  <div class="card"><div class="row"><h3 id="fvTitle"></h3><span class="small right" id="fvId"></span></div></div>
-  <div id="fvBody"></div>
-  <div class="row"><button class="btn" id="btnBackHome">返回首頁</button><button class="btn primary right" id="btnPrint">列印/PDF</button></div>
-</template>
+  <script>
+    // Service worker registration
+    if ('serviceWorker' in navigator) {
+      window.addEventListener('load', () => {
+        navigator.serviceWorker.register('sw.js');
+      });
+    }
 
-<template id="tpl-match">
-  <div class="card"><div class="row"><h3>配對結果</h3><span class="small right" id="mtId"></span></div></div>
-  <div class="row" style="gap:12px">
-    <div class="row" style="gap:6px"><img id="mtLeftPhoto" style="width:32px;height:32px;border-radius:50%"><span id="mtLeftName"></span></div>
-    <span class="small">×</span>
-    <div class="row" style="gap:6px"><img id="mtRightPhoto" style="width:32px;height:32px;border-radius:50%"><span id="mtRightName"></span></div>
-  </div>
-  <div style="height:8px"></div>
-  <div id="mtBody"></div>
-  <div class="row"><button class="btn" id="btnBackHome2">返回首頁</button><button class="btn primary right" id="btnPrint2">列印/PDF</button></div>
-</template>
+    // Exercise data structure
+    const exerciseData = [
+      {
+        area: '背部訓練',
+        subareas: [
+          { name: '上背', actions: ['引體向上', '高位下拉', '面拉'] },
+          { name: '下背', actions: ['硬舉', '背屈伸'] }
+        ]
+      },
+      {
+        area: '腿部訓練',
+        subareas: [
+          { name: '股四頭肌', actions: ['腿舉', '腿伸展'] },
+          { name: '腿後肌群', actions: ['腿彎舉', '硬舉'] }
+        ]
+      }
+    ];
 
-<script>
-const $ = s => document.querySelector(s);
-const now = () => Date.now();
-const uid = () => Math.random().toString(36).slice(2,10);
-const WILL = ['Unknown','No','0','1','2','3','5','6'];
-const CATALOG = [
-  { region:'背部訓練', sub:'上背', actions:['引體向上','高位下拉','面拉'] },
-  { region:'腿部訓練', sub:'股四頭肌', actions:['腿舉','腿伸展'] },
-];
+    // State variables
+    let forms = {}; // {id: {name, data}}
+    let currentFormId = null;
+    let pairCodes = {}; // {code: {formId, expires}}
+    let countdownTimer = null;
 
-// storage
-const K_USER='mm.user', K_FORMS='mm.forms', K_CODES='mm.codes', K_MATCH='mm.matches';
-const get = (k,d)=>{try{return JSON.parse(localStorage.getItem(k))??d}catch{return d}};
-const set = (k,v)=>localStorage.setItem(k,JSON.stringify(v));
+    // Load from localStorage on start
+    function loadFromStorage() {
+      const formData = localStorage.getItem('forms');
+      if (formData) {
+        try {
+          forms = JSON.parse(formData);
+        } catch (e) {
+          forms = {};
+        }
+      }
+      const codeData = localStorage.getItem('pairCodes');
+      if (codeData) {
+        try {
+          pairCodes = JSON.parse(codeData);
+        } catch (e) {
+          pairCodes = {};
+        }
+      }
+    }
 
-function syncAvatar(){ const u=get(K_USER,null); $('#navAvatar').src=u?.photoURL||''; $('#navAvatar').alt=u?.displayName||''; }
+    function saveToStorage() {
+      localStorage.setItem('forms', JSON.stringify(forms));
+      localStorage.setItem('pairCodes', JSON.stringify(pairCodes));
+    }
 
-// routing (hashless simple states)
-window.addEventListener('load',()=>{ renderLogin(); });
+    // Page navigation
+    function showPage(pageId) {
+      const pages = ['page-login','page-dashboard','page-form','page-preview','page-result'];
+      pages.forEach(pid => {
+        document.getElementById(pid).classList.toggle('hidden', pid !== pageId);
+      });
+    }
 
-function render(tpl){ $('#app').innerHTML=$(`#${tpl}`).innerHTML; syncAvatar(); }
+    function onLogin() {
+      showPage('page-dashboard');
+      updateDashboard();
+    }
 
-function renderLogin(){
-  render('tpl-login');
-  $('#btnLogin').onclick=()=>{
-    const displayName=$('#loginName').value.trim()||'使用者';
-    const photoURL=$('#loginPhoto').value.trim();
-    set(K_USER,{displayName,photoURL});
-    renderHome();
-  }
-}
+    function goBackToDashboard() {
+      showPage('page-dashboard');
+      updateDashboard();
+    }
 
-function renderHome(){
-  if(!get(K_USER,null)) return renderLogin();
-  render('tpl-home');
-  // forms list
-  const list = $('#formList'); list.innerHTML='';
-  const forms = get(K_FORMS,{});
-  const keys = Object.keys(forms);
-  if(keys.length===0){
-    const banner=document.createElement('div');
-    banner.className='banner';
-    banner.textContent='目前沒有表單，點擊新建表單';
-    banner.onclick=()=>renderFormEdit(null);
-    list.appendChild(banner);
-  }else{
-    keys.sort((a,b)=> (forms[b].updatedAt||0)-(forms[a].updatedAt||0));
-    keys.forEach(id=>{
-      const row=document.createElement('div'); row.className='row card';
-      row.innerHTML=`<div><div><strong>${forms[id].name}</strong></div><div class="small">更新：${new Date(forms[id].updatedAt||0).toLocaleString()}</div></div>`;
-      const v=document.createElement('button'); v.className='btn'; v.textContent='預覽'; v.onclick=()=>renderFormView(id);
-      const e=document.createElement('button'); e.className='btn'; e.textContent='編輯'; e.onclick=()=>renderFormEdit(id);
-      row.appendChild(v); row.appendChild(e); list.appendChild(row);
+    // Dashboard update
+    function updateDashboard() {
+      loadFromStorage();
+      const formList = document.getElementById('formList');
+      formList.innerHTML = '';
+      const keys = Object.keys(forms);
+      // Update new form button visibility
+      const newFormBtn = document.getElementById('newFormBtn');
+      // Update pair form select options
+      const select = document.getElementById('pairFormSelect');
+      select.innerHTML = '';
+      // Clear generated code and countdown when switching
+      document.getElementById('generatedCode').textContent = '';
+      document.getElementById('countdown').textContent = '';
+      clearInterval(countdownTimer);
+      if (keys.length === 0) {
+        // Hide new form button because we show a big bar instead
+        if (newFormBtn) newFormBtn.style.display = 'none';
+        // Show long bar prompting to create new form
+        const li = document.createElement('li');
+        li.style.width = '100%';
+        // Create a styled div acting as a long bar
+        const bar = document.createElement('div');
+        bar.textContent = '點擊新建表單';
+        bar.style.padding = '1rem';
+        bar.style.border = '2px dashed #4a90e2';
+        bar.style.background = '#e7f3ff';
+        bar.style.textAlign = 'center';
+        bar.style.cursor = 'pointer';
+        bar.onclick = createNewForm;
+        li.appendChild(bar);
+        formList.appendChild(li);
+        // Populate select with a single option
+        const opt = document.createElement('option');
+        opt.value = '';
+        opt.textContent = '尚未有表單';
+        select.appendChild(opt);
+        // Disable generate code button
+        document.getElementById('generateCodeBtn').disabled = true;
+      } else {
+        // Show new form button
+        if (newFormBtn) newFormBtn.style.display = 'inline-block';
+        // Populate form list
+        keys.forEach(id => {
+          const li = document.createElement('li');
+          li.textContent = forms[id].name;
+          const editBtn = document.createElement('button');
+          editBtn.textContent = '編輯';
+          editBtn.onclick = () => editForm(id);
+          const previewBtn = document.createElement('button');
+          previewBtn.textContent = '預覽';
+          previewBtn.onclick = () => previewForm(id);
+          li.appendChild(editBtn);
+          li.appendChild(previewBtn);
+          formList.appendChild(li);
+        });
+        // Populate select options
+        const defaultOpt = document.createElement('option');
+        defaultOpt.value = '';
+        defaultOpt.textContent = '請選擇表單';
+        select.appendChild(defaultOpt);
+        keys.forEach(id => {
+          const opt = document.createElement('option');
+          opt.value = id;
+          opt.textContent = forms[id].name;
+          select.appendChild(opt);
+        });
+        // Enable generate code button
+        document.getElementById('generateCodeBtn').disabled = false;
+      }
+    }
+
+    // Create new form
+    function createNewForm() {
+      currentFormId = null;
+      document.getElementById('formName').value = '';
+      buildFormArea({});
+      showPage('page-form');
+    }
+
+    // Edit existing form
+    function editForm(id) {
+      currentFormId = id;
+      const f = forms[id];
+      document.getElementById('formName').value = f.name;
+      buildFormArea(f.data);
+      showPage('page-form');
+    }
+
+    // Build dynamic form UI
+    function buildFormArea(savedData) {
+      const container = document.getElementById('formArea');
+      container.innerHTML = '';
+      exerciseData.forEach(area => {
+        const areaDiv = document.createElement('div');
+        areaDiv.className = 'card';
+        const areaTitle = document.createElement('h3');
+        areaTitle.textContent = area.area;
+        areaDiv.appendChild(areaTitle);
+        area.subareas.forEach(sub => {
+          const subTitle = document.createElement('h4');
+          subTitle.textContent = sub.name;
+          areaDiv.appendChild(subTitle);
+          sub.actions.forEach(act => {
+            const row = document.createElement('div');
+            row.className = 'select-container';
+            const label = document.createElement('label');
+            label.textContent = act;
+            row.appendChild(label);
+            const toggleBtn = document.createElement('button');
+            toggleBtn.textContent = (savedData && savedData[act] && savedData[act].experienced) ? '✅' : '❌';
+            toggleBtn.style.marginRight = '0.5rem';
+            toggleBtn.onclick = () => {
+              const val = toggleBtn.textContent === '✅';
+              toggleBtn.textContent = val ? '❌' : '✅';
+            };
+            row.appendChild(toggleBtn);
+            const sel = document.createElement('select');
+            const options = ['Unknown', 'No', '0', '1', '2', '3', '5', '6'];
+            options.forEach(opt => {
+              const o = document.createElement('option');
+              o.value = opt;
+              o.textContent = opt;
+              sel.appendChild(o);
+            });
+            // Set default value
+            if (savedData && savedData[act]) {
+              sel.value = savedData[act].value;
+            }
+            row.appendChild(sel);
+            row.dataset.action = act;
+            areaDiv.appendChild(row);
+          });
+        });
+        container.appendChild(areaDiv);
+      });
+    }
+
+    // Save form
+    function saveCurrentForm() {
+      const name = document.getElementById('formName').value.trim();
+      if (!name) {
+        alert('請輸入表單名稱');
+        return;
+      }
+      // Gather data
+      const inputs = document.querySelectorAll('#formArea .select-container');
+      const data = {};
+      inputs.forEach(row => {
+        const act = row.dataset.action;
+        const experienced = row.querySelector('button').textContent === '✅';
+        const value = row.querySelector('select').value;
+        data[act] = { experienced, value };
+      });
+      if (currentFormId) {
+        forms[currentFormId] = { name, data };
+      } else {
+        const id = 'form-' + Date.now();
+        forms[id] = { name, data };
+        currentFormId = id;
+      }
+      saveToStorage();
+      alert('表單已儲存！');
+      showPage('page-dashboard');
+      updateDashboard();
+    }
+
+    // Preview form
+    function previewForm(id) {
+      currentFormId = id;
+      const f = forms[id];
+      const preview = document.getElementById('previewContent');
+      preview.innerHTML = '';
+      const title = document.createElement('h2');
+      title.textContent = f.name;
+      preview.appendChild(title);
+      const table = document.createElement('table');
+      const thead = document.createElement('thead');
+      thead.innerHTML = '<tr><th>動作</th><th>有經驗</th><th>意願值</th></tr>';
+      table.appendChild(thead);
+      const tbody = document.createElement('tbody');
+      Object.keys(f.data).forEach(act => {
+        const tr = document.createElement('tr');
+        const tdAct = document.createElement('td');
+        tdAct.textContent = act;
+        const tdExp = document.createElement('td');
+        tdExp.textContent = f.data[act].experienced ? '✅' : '❌';
+        const tdVal = document.createElement('td');
+        tdVal.textContent = f.data[act].value;
+        tr.appendChild(tdAct);
+        tr.appendChild(tdExp);
+        tr.appendChild(tdVal);
+        tbody.appendChild(tr);
+      });
+      table.appendChild(tbody);
+      preview.appendChild(table);
+      showPage('page-preview');
+    }
+
+    // Generate random 6-digit code
+    function generatePairCode() {
+      loadFromStorage();
+      const select = document.getElementById('pairFormSelect');
+      const selectedId = select ? select.value : '';
+      const keys = Object.keys(forms);
+      if (!selectedId) {
+        if (keys.length === 0) {
+          alert('請新建表單');
+        } else {
+          alert('請先選擇要配對的表單');
+        }
+        return;
+      }
+      currentFormId = selectedId;
+      const code = ('' + Math.floor(100000 + Math.random() * 900000));
+      const expires = Date.now() + 5 * 60 * 1000; // 5 mins
+      pairCodes[code] = { formId: currentFormId, expires };
+      saveToStorage();
+      document.getElementById('generatedCode').textContent = code;
+      startCountdown(code, expires);
+      alert('配對碼已建立：' + code + '\n請在五分鐘內與對方分享此配對碼。');
+    }
+
+    // Start countdown for pair code
+    function startCountdown(code, expires) {
+      clearInterval(countdownTimer);
+      const countdownElem = document.getElementById('countdown');
+      function update() {
+        const now = Date.now();
+        const diff = expires - now;
+        if (diff <= 0) {
+          clearInterval(countdownTimer);
+          countdownElem.textContent = '配對碼已過期';
+          delete pairCodes[code];
+          saveToStorage();
+          return;
+        }
+        const minutes = Math.floor(diff / 60000);
+        const seconds = Math.floor((diff % 60000) / 1000);
+        countdownElem.textContent = `剩餘 ${minutes}分${seconds}秒`;
+      }
+      update();
+      countdownTimer = setInterval(update, 1000);
+    }
+
+    // Enter pair code
+    function enterPairCode() {
+      const input = document.getElementById('pairInput').value.trim();
+      if (!input) {
+        alert('請輸入配對碼');
+        return;
+      }
+      loadFromStorage();
+      const info = pairCodes[input];
+      if (!info) {
+        alert('配對碼不存在或已被使用');
+        return;
+      }
+      const now = Date.now();
+      if (now > info.expires) {
+        delete pairCodes[input];
+        saveToStorage();
+        alert('配對碼已過期');
+        return;
+      }
+      // For demonstration, pair the stored form with itself or with first available form
+      const form1 = forms[info.formId];
+      let form2 = null;
+      // If there is another form, use it; else use the same
+      const keysArr = Object.keys(forms);
+      if (keysArr.length > 1) {
+        for (let k of keysArr) {
+          if (k !== info.formId) {
+            form2 = forms[k];
+            break;
+          }
+        }
+      }
+      if (!form2) form2 = form1;
+      // Compute results
+      const results = computePairResults(form1.data, form2.data);
+      delete pairCodes[input];
+      saveToStorage();
+      displayResults(results);
+      showPage('page-result');
+    }
+
+    // Compute pair results based on rules
+    function computePairResults(data1, data2) {
+      const avoid = [];
+      const favorite = [];
+      const discuss = [];
+      const normal = [];
+      const allActions = Object.keys(data1);
+      allActions.forEach(act => {
+        const val1 = data1[act].value;
+        const val2 = data2[act].value;
+        if (val1 === 'No' && val2 === 'No') {
+          avoid.push(act);
+        } else if (val1 === '6' && val2 === '6') {
+          favorite.push(act);
+        } else if ((val1 === '6' && val2 === 'Unknown') || (val2 === '6' && val1 === 'Unknown')) {
+          discuss.push(act);
+        } else {
+          normal.push(act);
+        }
+      });
+      return { avoid, favorite, discuss, normal };
+    }
+
+    // Display results on result page
+    function displayResults(res) {
+      const container = document.getElementById('resultContent');
+      container.innerHTML = '';
+      const sections = [
+        { title: '雙方都拒絕的項目 (避免)', list: res.avoid },
+        { title: '雙方都喜愛的項目 (最愛)', list: res.favorite },
+        { title: '一人最愛、一人未知 (可討論)', list: res.discuss },
+        { title: '其他項目 (普通)', list: res.normal }
+      ];
+      sections.forEach(sec => {
+        if (sec.list.length > 0) {
+          const div = document.createElement('div');
+          div.className = 'result-section card';
+          const h3 = document.createElement('h3');
+          h3.textContent = sec.title;
+          div.appendChild(h3);
+          const ul = document.createElement('ul');
+          ul.style.listStyle = 'disc inside';
+          sec.list.forEach(item => {
+            const li = document.createElement('li');
+            li.textContent = item;
+            ul.appendChild(li);
+          });
+          div.appendChild(ul);
+          container.appendChild(div);
+        }
+      });
+    }
+
+    // Initialize on load
+    window.addEventListener('load', () => {
+      loadFromStorage();
     });
-  }
-  $('#btnNewForm').onclick=()=>renderFormEdit(null);
-
-  // pair panel
-  const sel=$('#selForm'); sel.innerHTML='';
-  if(keys.length===0){
-    const opt=document.createElement('option'); opt.textContent='尚未有表單'; sel.appendChild(opt); sel.disabled=true;
-    $('#btnMake').disabled=true;
-  }else{
-    sel.disabled=false; $('#btnMake').disabled=false;
-    keys.forEach(id=>{ const o=document.createElement('option'); o.value=id; o.textContent=forms[id].name; sel.appendChild(o); });
-  }
-
-  $('#btnMake').onclick=()=>{
-    const id=sel.value;
-    if(!id){ alert('請先選擇要配對的表單'); return; }
-    const code=(''+Math.floor(100000+Math.random()*900000));
-    const expires=now()+5*60*1000;
-    const codes=get(K_CODES,{}); codes[code]={formId:id,expires,used:false}; set(K_CODES,codes);
-    $('#codeOut').textContent=code; startCountdown(code,expires);
-    alert('配對碼已建立：'+code);
-  };
-
-  $('#btnJoin').onclick=()=>{
-    const code=$('#inpCode').value.trim();
-    if(!code) return alert('請輸入配對碼');
-    const codes=get(K_CODES,{}); const rec=codes[code];
-    if(!rec) return alert('配對碼不存在');
-    if(rec.used) return alert('配對碼已使用');
-    if(rec.expires<=now()) return alert('配對碼已過期');
-    if(keys.length===0) return alert('請新建表單');
-    // 讓使用者挑自己的表單
-    let id=sel.value;
-    if(!id){ alert('請先選擇要配對的表單'); return; }
-    // 一次性
-    rec.used=true; codes[code]=rec; set(K_CODES,codes);
-    const left=get(K_FORMS,{})[rec.formId]; const right=get(K_FORMS,{})[id];
-    const match=buildMatch(left,right);
-    const matches=get(K_MATCH,{}); matches[match.id]=match; set(K_MATCH,matches);
-    renderMatch(match.id);
-  };
-}
-
-let timerId=null;
-function startCountdown(code,expires){
-  clearInterval(timerId);
-  const el=$('#countdown');
-  const tick=()=>{
-    const d=expires-now();
-    if(d<=0){ clearInterval(timerId); el.textContent='配對碼已過期'; const cs=get(K_CODES,{}); delete cs[code]; set(K_CODES,cs); return; }
-    const m=Math.floor(d/60000), s=Math.floor((d%60000)/1000);
-    el.textContent=`剩餘 ${m}:${String(s).padStart(2,'0')}`;
-  };
-  tick(); timerId=setInterval(tick,1000);
-}
-
-function renderFormEdit(id){
-  render('tpl-form-edit');
-  const forms=get(K_FORMS,{});
-  let f;
-  if(id && forms[id]){
-    f=JSON.parse(JSON.stringify(forms[id]));
-  }else{
-    const u=get(K_USER,null);
-    f={id:uid(), ownerName:u?.displayName||'使用者', ownerPhoto:u?.photoURL||'', name:'', createdAt:now(), updatedAt:now(), entries:[]};
-    CATALOG.forEach(g=>g.actions.forEach(a=>f.entries.push({key:`${g.region}|${g.sub}|${a}`, region:g.region, subregion:g.sub, action:a, experience:false, willingness:'Unknown'})));
-  }
-  $('#feId').textContent=f.id; $('#feName').value=f.name;
-  const body=$('#feBody'); body.innerHTML='';
-  const groups={};
-  f.entries.forEach(e=>{ const k=`${e.region}|${e.subregion}`; (groups[k]=groups[k]||[]).push(e); });
-  Object.entries(groups).forEach(([k,arr])=>{
-    const [r,s]=k.split('|'); const wrap=document.createElement('div'); wrap.className='group';
-    wrap.innerHTML=`<div><strong>${r}</strong> / <span class="small">${s}</span></div>`;
-    arr.forEach(e=>{
-      const row=document.createElement('div'); row.className='row'; row.style.margin='6px 0';
-      const btn=document.createElement('button'); btn.className='btn'; btn.textContent=e.experience?'✅ 有經驗':'❌ 無經驗';
-      btn.onclick=()=>{ e.experience=!e.experience; btn.textContent=e.experience?'✅ 有經驗':'❌ 無經驗'; };
-      const sel=document.createElement('select'); WILL.forEach(w=>{ const o=document.createElement('option'); o.textContent=w; if(e.willingness===w) o.selected=true; sel.appendChild(o); });
-      sel.onchange=ev=>e.willingness=ev.target.value;
-      const label=document.createElement('div'); label.style.minWidth='140px'; label.textContent=e.action;
-      row.appendChild(label); row.appendChild(btn); row.appendChild(sel); wrap.appendChild(row);
-    });
-    body.appendChild(wrap);
-  });
-  $('#btnBack').onclick=()=>renderHome();
-  $('#btnSave').onclick=()=>{
-    f.name=$('#feName').value.trim()||'未命名表單'; f.updatedAt=now(); const all=get(K_FORMS,{}); all[f.id]=f; set(K_FORMS,all); alert('已儲存'); renderHome();
-  };
-}
-
-function renderFormView(id){
-  const forms=get(K_FORMS,{}); const f=forms[id]; if(!f){ alert('表單不存在'); return renderHome(); }
-  render('tpl-form-view');
-  $('#fvId').textContent=id; $('#fvTitle').textContent=f.name;
-  const body=$('#fvBody'); body.innerHTML='';
-  const groups={}; f.entries.forEach(e=>{ const k=`${e.region}|${e.subregion}`; (groups[k]=groups[k]||[]).push(e); });
-  Object.entries(groups).forEach(([k,arr])=>{
-    const [r,s]=k.split('|'); const box=document.createElement('div'); box.className='group'; box.innerHTML=`<div><strong>${r}</strong> / <span class="small">${s}</span></div>`;
-    arr.forEach(e=>{ const line=document.createElement('div'); line.className='row'; line.style.margin='4px 0'; line.innerHTML=`<div style="min-width:140px">${e.action}</div><span class="pill">${e.willingness}</span>`; box.appendChild(line); });
-    body.appendChild(box);
-  });
-  $('#btnBackHome').onclick=()=>renderHome(); $('#btnPrint').onclick=()=>window.print();
-}
-
-function renderMatch(id){
-  const m=get(K_MATCH,{})[id]; if(!m){ alert('結果不存在'); return renderHome(); }
-  render('tpl-match');
-  $('#mtId').textContent=id; $('#mtLeftName').textContent=m.leftName; $('#mtRightName').textContent=m.rightName;
-  const forms=get(K_FORMS,{});
-  $('#mtLeftPhoto').src=forms[m.leftFormId]?.ownerPhoto||''; $('#mtRightPhoto').src=forms[m.rightFormId]?.ownerPhoto||'';
-  const sec=(title,arr,cls)=>{ const box=document.createElement('div'); box.className='card'; box.innerHTML=`<div class="row"><h4>${title}</h4><span class="pill ${cls} right">${arr.length}</span></div>`; if(arr.length===0) box.innerHTML+='<div class="small">無</div>'; arr.forEach(it=>{ const line=document.createElement('div'); line.className='row'; line.style.margin='4px 0'; line.innerHTML=`<div style="min-width:160px">${it.action}</div><span class="pill">${it.left}</span><span class="pill">${it.right}</span>`; box.appendChild(line); }); return box; };
-  const body=$('#mtBody'); body.innerHTML=''; body.appendChild(sec('避免項目（雙方 No）', m.result.bothNo,'no')); body.appendChild(sec('最愛項目（雙方 6）', m.result.bothSix,'ok')); body.appendChild(sec('可討論（6 × Unknown）', m.result.sixUnknown,'warn')); body.appendChild(sec('其他', m.result.others,''));
-  $('#btnBackHome2').onclick=()=>renderHome(); $('#btnPrint2').onclick=()=>window.print();
-}
-
-// algorithm
-function buildMatch(left,right){
-  const L=Object.fromEntries(left.entries.map(e=>[e.key,e])); const R=Object.fromEntries(right.entries.map(e=>[e.key,e]));
-  const res={bothNo:[],bothSix:[],sixUnknown:[],others:[]};
-  Object.keys(L).forEach(k=>{ const a=L[k], b=R[k]; if(!b) return; const pair={action:a.action,left:a.willingness,right:b.willingness}; if(a.willingness==='No'&&b.willingness==='No') res.bothNo.push(pair); else if(a.willingness==='6'&&b.willingness==='6') res.bothSix.push(pair); else if((a.willingness==='6'&&b.willingness==='Unknown')||(b.willingness==='6'&&a.willingness==='Unknown')) res.sixUnknown.push(pair); else res.others.push(pair); });
-  const u=get(K_USER,null);
-  return {id:uid(), createdAt:now(), leftFormId:left.id, rightFormId:right.id, leftName:left.ownerName, rightName:right.ownerName, result:res};
-}
-
-</script>
+  </script>
 </body>
 </html>
