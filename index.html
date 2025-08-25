@@ -334,6 +334,15 @@
           previewBtn.onclick = () => previewForm(id);
           li.appendChild(editBtn);
           li.appendChild(previewBtn);
+          // Add a red delete button after the preview button
+          const deleteBtn = document.createElement('button');
+          deleteBtn.textContent = '刪除';
+          deleteBtn.style.background = '#e74c3c';
+          deleteBtn.style.color = '#fff';
+          deleteBtn.style.border = 'none';
+          deleteBtn.style.marginLeft = '0.5rem';
+          deleteBtn.onclick = () => deleteForm(id);
+          li.appendChild(deleteBtn);
           formList.appendChild(li);
         });
         // Populate select options
@@ -477,6 +486,40 @@
       table.appendChild(tbody);
       preview.appendChild(table);
       showPage('page-preview');
+    }
+
+    // Delete a form by its ID. Shows a confirmation prompt before deletion
+    function deleteForm(id) {
+      if (confirm('確定要刪除此表單嗎？此操作無法復原。')) {
+        // Delete the entry from the forms object
+        delete forms[id];
+        // Reset current selection if necessary
+        if (currentFormId === id) {
+          currentFormId = null;
+        }
+        // Persist changes and update UI
+        saveToStorage();
+        updateDashboard();
+        showPage('page-dashboard');
+      }
+    }
+
+    // Delete a form by its ID with user confirmation
+    function deleteForm(id) {
+      // Ask for confirmation before deleting
+      if (confirm('確定要刪除此表單嗎？此操作無法復原。')) {
+        // Remove the form data
+        delete forms[id];
+        // Reset currentFormId if the deleted form was selected
+        if (currentFormId === id) {
+          currentFormId = null;
+        }
+        // Persist changes
+        saveToStorage();
+        // Update UI and navigate back to the dashboard
+        updateDashboard();
+        showPage('page-dashboard');
+      }
     }
 
     // Generate random 6-digit code
