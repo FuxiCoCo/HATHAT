@@ -3,7 +3,7 @@
 <head>
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-  <title>帽帽健身配對平台</title>
+  <title>帽帽BDSM配對平台</title>
   <!-- PWA manifest -->
   <link rel="manifest" href="manifest.json" />
   <style>
@@ -34,6 +34,23 @@
       width: 40px;
       height: 40px;
       border-radius: 50%;
+    }
+    /* 調整配對功能欄位與按鈕同高 */
+    /* 配對功能第一行：下拉選單與建立配對碼按鈕 */
+    #pairSection select,
+    #pairSection button {
+      padding: 0.5rem;
+      height: 2.5rem;
+    }
+    /* 配對功能第二行：輸入配對碼與配對按鈕 */
+    #pairInputSection input[type="text"],
+    #pairInputSection button {
+      padding: 0.5rem;
+      height: 2.5rem;
+    }
+    /* 調整第二行的按鈕左右內距讓文字置中 */
+    #pairInputSection button {
+      padding: 0.5rem 1rem;
     }
     main {
       padding: 1rem;
@@ -107,6 +124,67 @@
       margin-left: 0.5rem;
       color: #e67e22;
     }
+
+    /* 公告輪播元件樣式 */
+    #announcement-top {
+      overflow-wrap: anywhere;
+      margin-bottom: 0.5rem;
+    }
+    .announce {
+      position: relative;
+      overflow: hidden;
+    }
+    .announce-track {
+      display: flex;
+      transition: transform 0.6s ease;
+      will-change: transform;
+    }
+    .announce-item {
+      min-width: 100%;
+      box-sizing: border-box;
+      padding: 0.5rem;
+    }
+    .announce-item a {
+      display: block;
+      text-decoration: none;
+      color: inherit;
+    }
+    .announce-item img {
+      max-width: 100%;
+      height: auto;
+      display: block;
+      border-radius: 6px;
+    }
+    .announce-caption {
+      margin-top: 0.5rem;
+      font-size: 0.95rem;
+    }
+    .announce-title {
+      font-weight: 700;
+    }
+    .announce-nav {
+      position: absolute;
+      top: 50%;
+      transform: translateY(-50%);
+      background: rgba(0, 0, 0, 0.5);
+      color: #fff;
+      border: 0;
+      border-radius: 50%;
+      width: 32px;
+      height: 32px;
+      cursor: pointer;
+    }
+    .announce-nav.prev {
+      left: 0.5rem;
+    }
+    .announce-nav.next {
+      right: 0.5rem;
+    }
+    @media (prefers-reduced-motion: reduce) {
+      .announce-track {
+        transition: none;
+      }
+    }
   </style>
 </head>
 <body>
@@ -122,13 +200,24 @@
   <div id="page-dashboard" class="hidden">
     <header>
       <h1>帽帽</h1>
-      <img src="https://placekitten.com/80/80" alt="使用者頭像" />
+      <div style="display:flex; align-items:center;">
+        <img src="https://placekitten.com/80/80" alt="使用者頭像" />
+        <!-- 退出按鈕：點擊返回登入頁 -->
+        <button onclick="logout()" style="background:#e74c3c; color:#fff; border:none; padding:0.25rem 0.75rem; margin-left:0.5rem; border-radius:4px;">退出</button>
+      </div>
     </header>
     <main>
-      <!-- 公告區 -->
+      <!-- 公告區：上方純文字，下方輪播元件 -->
       <div class="card">
         <h2>公告</h2>
-        <p>歡迎使用帽帽健身偏好配對平台！請先建立自己的訓練表單，再使用配對碼與朋友進行匹配。</p>
+        <!-- 顯示一段純文字公告 -->
+        <div id="announcement-top">歡迎使用帽帽圈內配對平台！請先建立自己的訓練表單，再使用配對碼與朋友進行匹配。</div>
+        <!-- 輪播元件容器 -->
+        <div id="announce" class="announce">
+          <div class="announce-track" id="announceTrack"></div>
+          <button class="announce-nav prev" id="announcePrev" aria-label="上一則">‹</button>
+          <button class="announce-nav next" id="announceNext" aria-label="下一則">›</button>
+        </div>
       </div>
       <!-- 表單區 -->
       <div class="card">
@@ -142,13 +231,14 @@
         <h2>配對功能</h2>
         <div id="pairSection">
           <!-- 下拉選擇配對用的表單，動態填入 -->
-          <select id="pairFormSelect" style="margin-right:0.5rem; padding:0.25rem;"></select>
+          <select id="pairFormSelect" style="margin-right:0.5rem;"></select>
           <button id="generateCodeBtn" onclick="generatePairCode()">建立配對碼</button>
           <span id="generatedCode" style="font-weight:bold; margin-left:0.5rem;"></span>
           <span id="countdown" class="countdown"></span>
         </div>
-        <div style="margin-top:1rem;">
-          <input type="text" id="pairInput" placeholder="輸入配對碼" style="padding:0.25rem; width:70%;" />
+        <!-- 第二行輸入配對碼區段，加入 id 方便設定高度 -->
+        <div id="pairInputSection" style="margin-top:1rem;">
+          <input type="text" id="pairInput" placeholder="輸入配對碼" style="width:70%;" />
           <button onclick="enterPairCode()">配對</button>
         </div>
       </div>
@@ -168,7 +258,7 @@
         </label>
       </div>
       <div id="formArea"></div>
-      <button onclick="saveCurrentForm()" style="margin-top:1rem;">儲存表單</button>
+      <button id="saveFormBtn" onclick="saveCurrentForm()" style="margin-top:1rem;">儲存表單</button>
     </main>
   </div>
 
@@ -214,22 +304,50 @@
     }
 
     // Exercise data structure
-    const exerciseData = [
-      {
-        area: '背部訓練',
-        subareas: [
-          { name: '上背', actions: ['引體向上', '高位下拉', '面拉'] },
-          { name: '下背', actions: ['硬舉', '背屈伸'] }
-        ]
-      },
-      {
-        area: '腿部訓練',
-        subareas: [
-          { name: '股四頭肌', actions: ['腿舉', '腿伸展'] },
-          { name: '腿後肌群', actions: ['腿彎舉', '硬舉'] }
-        ]
-      }
-    ];
+      const exerciseData = [
+    {
+      area: '口',
+      subareas: [
+        { name: '主動侍奉', actions: ['為主人口交', '男主-命主人口交掃除', '男主-命主人口內射精液(指定者)', '男主-口+冰火'] },
+        { name: '吻', actions: ['口封口(強吻)', '啃吻', '吸吻', '唇交', '舔吻', '愛撫'] },
+        { name: '舔舐', actions: ['舔舐(寵式)'] }
+      ]
+    },
+    {
+      area: '乳',
+      subareas: [
+        { name: '主動侍奉', actions: ['男主-命主人乳交', '男主-命主人乳內射精液(交叉)', '舔舐(寵式)'] }
+      ]
+    },
+    {
+      area: '陰部',
+      subareas: [
+        { name: '性交', actions: ['男主-伴性性交', '男主-伴性性交(內射)', '男主-伴性性交(內射多次)'] },
+        { name: '性調', actions: ['陰部愛撫', '陰道愛撫', '陰蒂愛撫', '內插', '陰道插入', '雙穴(陰口插入)', '肛穴插入'] },
+        { name: '尿道', actions: ['導尿/假尿', '陰部口交', '陰道口交'] },
+        { name: '舔舐', actions: ['陰部舔舐(寵式)', '陰道舔舐', '蜜物呈用'] }
+      ]
+    },
+    {
+      area: '肛',
+      subareas: [
+        { name: '肛交', actions: ['男主-伴性肛交', '男主-伴性性交(內射)', '女主-命侍乳口交'] },
+        { name: '侍奉', actions: ['為主人舔肛'] },
+        { name: '舔吻', actions: ['肛舔'] },
+        { name: '肛調', actions: ['肛愛撫', '肛內插入', '蜜物呈用'] }
+      ]
+    },
+    {
+      area: '束縛/拘束/限制',
+      subareas: [
+        { name: '感情', actions: ['全身性綁縛', '上身綁縛', '下身綁縛', '乳房綁縛', '陰部綁縛', '肛門綁縛', '頸式', '口球塞'] },
+        { name: '拘束/限制', actions: ['火燒/煙燻', '口罩/口夾/矽膠口塞具', '力', '木板/繩繩', '皮帶/鐵鍊', '手銬/腳鐐', '眼罩'] },
+        { name: '姿勢', actions: ['木乃伊', '架住(吊住/半身/全身綁定)'] },
+        { name: '活動範圍限制', actions: ['牽繩/鎖鏈(頸具)', '限制(指令/道具)', '限制(列約為強迫性)'] },
+        { name: '特殊', actions: ['長期限制'] }
+      ]
+    }
+  ];
 
     // State variables
     let forms = {}; // {id: {name, data}}
@@ -278,6 +396,17 @@
     function goBackToDashboard() {
       showPage('page-dashboard');
       updateDashboard();
+    }
+
+    // Logout function: returns to login page without clearing saved data
+    function logout() {
+      // Reset current form selection and countdown
+      currentFormId = null;
+      clearInterval(countdownTimer);
+      document.getElementById('generatedCode').textContent = '';
+      document.getElementById('countdown').textContent = '';
+      // Show login page
+      showPage('page-login');
     }
 
     // Dashboard update
@@ -334,9 +463,10 @@
           previewBtn.onclick = () => previewForm(id);
           li.appendChild(editBtn);
           li.appendChild(previewBtn);
-          // Add a red delete button after the preview button
+          // 新增刪除按鈕
           const deleteBtn = document.createElement('button');
           deleteBtn.textContent = '刪除';
+          // 設置紅色背景和白色文字
           deleteBtn.style.background = '#e74c3c';
           deleteBtn.style.color = '#fff';
           deleteBtn.style.border = 'none';
@@ -488,25 +618,8 @@
       showPage('page-preview');
     }
 
-    // Delete a form by its ID. Shows a confirmation prompt before deletion
-    function deleteForm(id) {
-      if (confirm('確定要刪除此表單嗎？此操作無法復原。')) {
-        // Delete the entry from the forms object
-        delete forms[id];
-        // Reset current selection if necessary
-        if (currentFormId === id) {
-          currentFormId = null;
-        }
-        // Persist changes and update UI
-        saveToStorage();
-        updateDashboard();
-        showPage('page-dashboard');
-      }
-    }
-
     // Delete a form by its ID with user confirmation
     function deleteForm(id) {
-      // Ask for confirmation before deleting
       if (confirm('確定要刪除此表單嗎？此操作無法復原。')) {
         // Remove the form data
         delete forms[id];
@@ -663,9 +776,146 @@
       });
     }
 
-    // Initialize on load
+    /* --- 公告輪播邏輯 --- */
+    // 安全檢查：只允許 http/https 協定，避免 XSS
+    function isSafeUrl(u) {
+      try {
+        const url = new URL(u, location.origin);
+        return ['http:', 'https:'].includes(url.protocol);
+      } catch {
+        return false;
+      }
+    }
+
+    // 渲染公告輪播
+    function renderAnnouncements(items) {
+      const track = document.getElementById('announceTrack');
+      if (!track) return;
+      track.innerHTML = '';
+      const safeItems = items.filter(item =>
+        item && isSafeUrl(item.img) && (!item.href || isSafeUrl(item.href))
+      ).slice(0, 10);
+      if (safeItems.length === 0) {
+        const empty = document.createElement('div');
+        empty.className = 'announce-item';
+        empty.textContent = '目前沒有公告';
+        track.appendChild(empty);
+        return;
+      }
+      safeItems.forEach(item => {
+        const slide = document.createElement('div');
+        slide.className = 'announce-item';
+        const link = document.createElement('a');
+        link.href = item.href || '#';
+        if (item.href) {
+          link.target = '_blank';
+          link.rel = 'noopener noreferrer';
+        }
+        const img = new Image();
+        img.loading = 'lazy';
+        img.decoding = 'async';
+        img.src = item.img;
+        if (item.alt) img.alt = item.alt;
+        if (item.width) img.width = item.width;
+        if (item.height) img.height = item.height;
+        img.onerror = () => {
+          slide.replaceChildren(document.createTextNode('圖片載入失敗'));
+        };
+        link.appendChild(img);
+        const cap = document.createElement('div');
+        cap.className = 'announce-caption';
+        const t = document.createElement('div');
+        t.className = 'announce-title';
+        t.textContent = item.title || '';
+        const p = document.createElement('div');
+        p.textContent = item.text || '';
+        cap.appendChild(t);
+        cap.appendChild(p);
+        slide.appendChild(link);
+        slide.appendChild(cap);
+        track.appendChild(slide);
+      });
+      let idx = 0;
+      const n = safeItems.length;
+      const apply = () => {
+        track.style.transform = `translateX(-${idx * 100}%)`;
+      };
+      let timer = null;
+      const start = () => {
+        if (window.matchMedia('(prefers-reduced-motion: reduce)').matches) return;
+        stop();
+        timer = setInterval(() => {
+          idx = (idx + 1) % n;
+          apply();
+        }, 5000);
+      };
+      const stop = () => {
+        if (timer) {
+          clearInterval(timer);
+          timer = null;
+        }
+      };
+      const prevBtn = document.getElementById('announcePrev');
+      const nextBtn = document.getElementById('announceNext');
+      if (prevBtn) prevBtn.onclick = () => {
+        idx = (idx - 1 + n) % n;
+        apply();
+      };
+      if (nextBtn) nextBtn.onclick = () => {
+        idx = (idx + 1) % n;
+        apply();
+      };
+      const container = document.getElementById('announce');
+      if (container) {
+        container.addEventListener('mouseenter', stop);
+        container.addEventListener('mouseleave', start);
+      }
+      let sx = 0;
+      let dx = 0;
+      track.addEventListener('touchstart', e => {
+        sx = e.touches[0].clientX;
+        dx = 0;
+        stop();
+      }, { passive: true });
+      track.addEventListener('touchmove', e => {
+        dx = e.touches[0].clientX - sx;
+      }, { passive: true });
+      track.addEventListener('touchend', () => {
+        if (Math.abs(dx) > 40) {
+          idx = (idx + (dx < 0 ? 1 : -1) + n) % n;
+        }
+        dx = 0;
+        apply();
+        start();
+      });
+      apply();
+      start();
+    }
+
+    async function initAnnouncements() {
+      try {
+        const resp = await fetch('announcements.json', { cache: 'no-store' });
+        const data = await resp.json();
+        if (Array.isArray(data)) {
+          renderAnnouncements(data);
+        } else {
+          renderAnnouncements([]);
+        }
+      } catch (e) {
+        console.warn('公告載入失敗', e);
+        renderAnnouncements([]);
+      }
+    }
+
+    // Initialize on load: 載入儲存的表單資料並初始化公告輪播
     window.addEventListener('load', () => {
       loadFromStorage();
+      initAnnouncements();
+      // 綁定儲存表單按鈕點擊事件，避免 inline onclick 無效
+      const saveBtn = document.getElementById('saveFormBtn');
+      if (saveBtn) {
+        saveBtn.addEventListener('click', saveCurrentForm);
+      }
     });
   </script>
 </body>
